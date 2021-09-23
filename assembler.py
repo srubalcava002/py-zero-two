@@ -60,7 +60,7 @@ addressing_modes = { # nested dictionary with addressing mode detected by parser
 }
 ### A S S E M B L Y ###
 
-def assemble():
+def assemble():         # might need a refactor to assemble line by line to solve the stack vs implied addressing mode problem
     line_number = 0
     current_byte = 0
 
@@ -82,12 +82,11 @@ def assemble():
                     for key in opcodes_implied:
                         if (opcode == key):
                             output[current_byte] = opcodes_implied[opcode]
+                            break    
+                    for key in opcodes_implied:
+                        if (opcode == key):
+                            output[current_byte] = opcodes_stack[opcode]
                             break
-                        else:
-                            for key in opcodes_implied:
-                                if (opcode == key):
-                                    output[current_byte] = opcodes_stack[opcode]
-                                break
                     current_byte += 1
                 elif (parameters.find('#') <= 0):   # lines containing '#' are immediate addressing mode
                     output[current_byte] = opcodes_immediate[opcode]

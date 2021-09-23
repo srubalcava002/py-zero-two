@@ -1,5 +1,3 @@
-
-
 def strip(line):
     line = line.split('\t')
     for word in line:

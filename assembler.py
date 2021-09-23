@@ -54,10 +54,6 @@ opcodes_internal = {
 
 }
 
-directives = {
-
-}
-
 addressing_modes = { # nested dictionary with addressing mode detected by parser as key and appropriate opcode dictionary as value
     '#': opcodes_immediate,
     '.': directives
@@ -77,17 +73,28 @@ def assemble():
             opcode = line[0]
             parameters = line[-1]
 
+            if (opcode[0] == "."):
+                if (opcode[1:-1] == "org"):
+                    current_address = parameters[0]     # might need to convert this to decimal from hex
+
             try:
                 if not parameters:    # lines with only instruction are implied or stack addressing mode
-                    output[current_byte] = opcodes_implied[line]
+                    for key in opcodes_implied:
+                        if (opcode == key):
+                            output[current_byte] = opcodes_implied[opcode]
+                            break
+                        else:
+                            for key in opcodes_implied:
+                                if (opcode == key):
+                                    output[current_byte] = opcodes_stack[opcode]
+                                break
                     current_byte += 1
                 elif (parameters.find('#') <= 0):   # lines containing '#' are immediate addressing mode
                     output[current_byte] = opcodes_immediate[opcode]
                     output[current_byte + 1] = int(parameters[1:-1])
                     current_byte += 2               # move two bytes to accomodate immediate data
                 else:
-                    output[current_byte] = opcodes_internal[opcode]
-                    current_byte += 1
+                    raise Exception("ILLEGAL OR UNSUPPORTED OPCODE")
             except:
                 traceback.print_exc()
                 util.error(line_number)

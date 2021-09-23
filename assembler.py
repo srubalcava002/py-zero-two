@@ -45,6 +45,10 @@ opcodes_immediate = {
     'eor': 0x49
 }
 
+opcodes_zero_page = {
+
+}
+
 opcodes_internal = {
 
 }

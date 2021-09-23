@@ -1,6 +1,7 @@
 import sys
 import util
 import traceback
+import parser
 
 """
 USAGE: python assembler.py assembly_code.s rom_file.bin
@@ -72,24 +73,12 @@ def assemble():
         print("OPENED FILE " + INPUT_FILE_NAME)
 
         while line:
-
-            if (line[0] == "."):
-                print('DIRECTIVE FOUND')
-            elif (len(line) > 3):
-                contents = line.split(' ')
-
-                opcode = contents[0]
-                parameters = contents[-1]
-
-                if (parameters.find(',') >= 0):
-                    parameters_split = parameters.split(',')
-                    parameter1 = parameters_split[0]
-                    parameter2 = parameters_split[-1]
+            line = parser.strip(line)
+            opcode = line[0]
+            parameters = line[-1]
 
             try:
-                line = sanitize_endline(line)
-
-                if (len(line) == 3):    # lines with only instruction are implied addressing mode
+                if not parameters:    # lines with only instruction are implied or stack addressing mode
                     output[current_byte] = opcodes_implied[line]
                     current_byte += 1
                 elif (parameters.find('#') <= 0):   # lines containing '#' are immediate addressing mode
@@ -107,10 +96,6 @@ def assemble():
             line = asm.readline()
              
     print('\033[92m' + "[INFO] ASSEMBLED " + str(current_byte) + " BYTES" '\033[0m')
-
-def sanitize_endline(string):
-    corrected_index = len(string) - 1
-    return string[0:corrected_index]
 
 ### WRITING PROCESS ###
 

@@ -54,8 +54,8 @@ addressing_modes = { # nested dictionary with addressing mode detected by parser
     '#': opcodes_immediate,
     '.': directives
 }
-### A S S E M B L Y ###
 
+### A S S E M B L Y ###
 def assemble(line: str) -> bytearray:         # might need a refactor to assemble line by line to solve the stack vs implied addressing mode problem
     assembled = bytearray()
 
@@ -63,24 +63,25 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
     opcode = line[1]
     parameters = line[-1]
 
+'''
         if (opcode[0] == "."):
             if (opcode[1:-1] == "org"):
                 current_address = parameters[0]     # might need to convert this to decimal from hex?
-
+'''
         try:
             if not parameters:    # lines with only instruction are implied or stack addressing mode
                 for key in opcodes_implied:
                     if (opcode == key):
-                        assembled[0] = opcodes_implied[opcode]
+                        assembled.append(opcodes_implied[opcode])
                         return assesmbled
                 for key in opcodes_implied:
                     if (opcode == key):
-                        assembled[0] = opcodes_stack[opcode]
+                        assembled.append(opcodes_stack[opcode])
                         return assembled
 
             elif (parameters.find('#') <= 0):   # lines containing '#' are immediate addressing mode
-                assembled[0] = opcodes_immediate[opcode]
-                output[1] = int(parameters[0])
+                assembled.append(opcodes_immediate[opcode])
+                assembled.append(int(parameters[0]))
                 return assembled
 
             else:
@@ -93,7 +94,7 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
 # might need a secondary write() function to handle .org directives
 
 if __name__ == '__main__':
-    output = bytearray([0xea] * 32768)       # prefill ENTIRE rom with nop instruction (could probably reduce memory use by just filling nop until iterator hits 32767? you already have current_byte)
+    output = bytearray([0xea] * 32768)
 
     current_byte = 0
 
@@ -104,7 +105,7 @@ if __name__ == '__main__':
             current_line_raw = assemble(current_line)
 
             for binary in current_line_raw:        # write each byte in the returned list to the rom bytearray
-                output[current_byte] = current_line_raw[element]
+                output[current_byte] = current_line_raw[binary]
                 current_byte += 1
 
             current_line = asm.readline()

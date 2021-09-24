@@ -1,6 +1,6 @@
 # py-zero-two
 
-A 6502 assembler targeted at the wd65c02, written in python. Inspired by Ben Eater's DIY 6502 project.
+A 6502 assembler targeted at the wd65c02, written in python. Inspired by Ben Eater's DIY 6502 project. My end goal for this is to have a toolchain capable of assembling any program written in 6502 assembly and writing it to Ben Eater's DIY 6502, with an eventual, optimized port to a more efficient language like C.
 
 ## assembler usage
 ```

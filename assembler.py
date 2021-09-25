@@ -1,7 +1,6 @@
 import sys
 import util
 import traceback
-import parser
 
 """
 USAGE: python assembler.py assembly_code.s rom_file.bin
@@ -34,6 +33,10 @@ opcodes_implied = {
     'sed': 0xf8,
 }
 
+opcodes_stack = {
+
+}
+
 opcodes_accumulator = {
     'asl': 0x0a,
     'inc': 0x1a
@@ -50,45 +53,45 @@ opcodes_zero_page = {
 
 }
 
-addressing_modes = { # nested dictionary with addressing mode detected by parser as key and appropriate opcode dictionary as value
-    '#': opcodes_immediate,
-    '.': directives
-}
-
 ### A S S E M B L Y ###
 def assemble(line: str) -> bytearray:         # might need a refactor to assemble line by line to solve the stack vs implied addressing mode problem
-    assembled = bytearray()
+    assembled = []
 
-    line = parser.strip(line)
-    opcode = line[1]
-    parameters = line[-1]
+    line = util.strip_whitespace(line)
+    opcode = line[0]
+    parameters = []
 
-'''
-        if (opcode[0] == "."):
-            if (opcode[1:-1] == "org"):
-                current_address = parameters[0]     # might need to convert this to decimal from hex?
-'''
-        try:
-            if not parameters:    # lines with only instruction are implied or stack addressing mode
-                for key in opcodes_implied:
-                    if (opcode == key):
-                        assembled.append(opcodes_implied[opcode])
-                        return assesmbled
-                for key in opcodes_implied:
-                    if (opcode == key):
-                        assembled.append(opcodes_stack[opcode])
-                        return assembled
+    print("trying: " + str(line))
+    for i in range(1, len(line)):
+        parameters.append(line[i])
+        print("appended to parameters[]: " + parameters[-1])
 
-            elif (parameters.find('#') <= 0):   # lines containing '#' are immediate addressing mode
-                assembled.append(opcodes_immediate[opcode])
-                assembled.append(int(parameters[0]))
-                return assembled
+    try:
+        if (len(line) == 1):    # lines with only instruction are implied or stack addressing mode
+            for key in opcodes_implied:
+                if (opcode == key):
+                    assembled.append(opcodes_implied[opcode])
+                    print("assembled: " + str(assembled))
+                    return assembled
 
-            else:
-                raise Exception("ILLEGAL OR UNSUPPORTED OPCODE")
-        except:
-            traceback.print_exc()
-            util.error(line_number)
+            for key in opcodes_stack:
+                if (opcode == key):
+                    assembled.append(opcodes_stack[opcode])
+                    print("assembled: " + str(assembled))
+                    return assembled
+
+        elif (parameters[0][0] == "#"):   # lines containing '#' are immediate addressing mode
+            assembled.append(opcodes_immediate[opcode])
+            print(parameters[0])
+            assembled.append(int(parameters[0][1:-1]))     # remove "#" prefixing immediate data
+            print("assembled: " + str(assembled))
+            return assembled
+
+        else:
+            raise Exception("ILLEGAL OR UNSUPPORTED OPCODE")
+    except:
+        traceback.print_exc()
+        util.error(opcode[0])
 
 ### WRITING PROCESS ###
 # might need a secondary write() function to handle .org directives
@@ -105,7 +108,7 @@ if __name__ == '__main__':
             current_line_raw = assemble(current_line)
 
             for binary in current_line_raw:        # write each byte in the returned list to the rom bytearray
-                output[current_byte] = current_line_raw[binary]
+                output[current_byte] = binary
                 current_byte += 1
 
             current_line = asm.readline()

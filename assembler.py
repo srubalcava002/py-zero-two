@@ -82,8 +82,7 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
 
         elif (parameters[0][0] == "#"):   # lines containing '#' are immediate addressing mode
             assembled.append(opcodes_immediate[opcode])
-            print(parameters[0])
-            assembled.append(int(parameters[0][1:-1]))     # remove "#" prefixing immediate data
+            assembled.append(int(parameters[0][1:]))     # remove "#" prefixing immediate data
             print("assembled: " + str(assembled))
             return assembled
 

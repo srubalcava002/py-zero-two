@@ -12,9 +12,8 @@ def strip_whitespace(line: str) -> list:
             del line[i]
         if (len(line) == 1):
             break
-    
+
     if (len(line) == 3):    # remove comma (last char of second elemtent) if there's two parameters
         line[1] = line[1][:-1]
 
-    print("returning: " + str(line))
     return line

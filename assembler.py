@@ -61,7 +61,6 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
     opcode = line[0]
     parameters = []
 
-    print("trying: " + str(line))
     for i in range(1, len(line)):
         parameters.append(line[i])
 

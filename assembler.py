@@ -64,26 +64,22 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
     print("trying: " + str(line))
     for i in range(1, len(line)):
         parameters.append(line[i])
-        print("appended to parameters[]: " + parameters[-1])
 
     try:
         if (len(line) == 1):    # lines with only instruction are implied or stack addressing mode
             for key in opcodes_implied:
                 if (opcode == key):
                     assembled.append(opcodes_implied[opcode])
-                    print("assembled: " + str(assembled))
                     return assembled
 
             for key in opcodes_stack:
                 if (opcode == key):
                     assembled.append(opcodes_stack[opcode])
-                    print("assembled: " + str(assembled))
                     return assembled
 
         elif (parameters[0][0] == "#"):   # lines containing '#' are immediate addressing mode
             assembled.append(opcodes_immediate[opcode])
             assembled.append(int(parameters[0][1:]))     # remove "#" prefixing immediate data
-            print("assembled: " + str(assembled))
             return assembled
 
         else:

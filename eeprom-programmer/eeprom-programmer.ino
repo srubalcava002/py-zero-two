@@ -7,7 +7,6 @@
 #define DATA_BEGIN 40
 #define DATA_END 48
 
-#define STATUS 49
 //  ADDRESS IS LATCHED BEFORE DATA, SO SET ADDRESS BEFORE THE FALLING EDGE WRITE PULSE AND DATA BEFORE RISING EDGE
 
 byte listenForData() {
@@ -68,36 +67,46 @@ void readEeprom() {
 }
 
 void setup() {
-    for (int i = WRITE_ENABLE; i <= STATUS; i++) {
+    for (int i = WRITE_ENABLE; i <= DATA_END; i++) {
         pinMode(i, OUTPUT);
     }
 
     digitalWrite(OUTPUT_ENABLE, HIGH);
-    digitalWrite(STATUS, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
 
     Serial.begin(57600);
 
     byte byte_write;
 
+    if (Serial.available() <= 0) {
+        Serial.write("A");
+        while (Serial.available() <= 0) {
+            delay(100);
+        }
+    }
+
     for (int current_byte = 0; current_byte < 32768; current_byte++) {
-        latchAddress(current_byte);
-        
-        while (byte_write == NULL) {        //USE THE hasNextSerial() thing
-            byte_write == listenForData();
+        Serial.write("C");
+        Serial.flush();
+
+        while(Serial.available() <= 0) {
+            delay(100);
         }
 
+        byte_write = Serial.read();
+        delay(100);
+        latchAddress(current_byte);
         latchData(byte_write);
 
-        Serial.write(1);
+        Serial.write("Q");
+        Serial.flush();
+        delay(100);        
     }
 }
 
 void loop() {
-    Serial.println("[SUCCESS] EEPROM WRITTEN!");
-    while(1 == 1) {
-        digitalWrite(STATUS, HIGH);
-        delay(500);
-        digitalWrite(STATUS, LOW);
-        delay(500);
-    }
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(500);
 }

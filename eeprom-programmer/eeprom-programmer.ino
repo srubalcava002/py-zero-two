@@ -34,7 +34,7 @@ void dataPolling() { // ATTEMPT TO READ LAST BYTE WRITTEN TO MAKE DATA VALID
 }
 
 void addressToPins(int current_address) {
-    current_address = current_address & 0b111111111111111;
+    //current_address = current_address & 0b111111111111111;
 
     for (int i = ADDRESS_BEGIN; i < ADDRESS_END; i++) {
         if (current_address & 1 == 1) {
@@ -86,7 +86,7 @@ void setup() {
     }
 
     for (int current_byte = 0; current_byte < 32768; current_byte++) {
-        Serial.write("C");
+        Serial.write("B");
         Serial.flush();
 
         while(Serial.available() <= 0) {

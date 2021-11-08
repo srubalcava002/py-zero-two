@@ -61,9 +61,36 @@ void dataToPins(byte current_data) {
     }
 }
 
-void readEeprom() {
+void clearLines() {
+    for (int i = ADDRESS_BEGIN; i <= DATA_END; i++) {
+        digitalWrite(i, LOW);
+    }
+}
+
+int readEeprom(int address) {
     digitalWrite(OUTPUT_ENABLE, LOW);
     
+    for (int i = DATA_BEGIN; i <= DATA_END; i++) {
+            pinMode(i, INPUT);
+    }
+    
+    latchAddress(address);
+
+    int data = 0;
+    int output = 0;
+    for (int i = DATA_BEGIN; i < DATA_END; i++) {
+        data = digitalRead(i);
+
+        if (data == HIGH) {
+            output += 1;
+            output = output << 1;
+        }
+        else {
+            output = output << 1;
+        }
+    }
+
+    return output;
 }
 
 void setup() {

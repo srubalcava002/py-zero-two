@@ -57,7 +57,10 @@ opcodes_zero_page = {
 def assemble(line: str) -> bytearray:         # might need a refactor to assemble line by line to solve the stack vs implied addressing mode problem
     assembled = []
 
-    line = util.strip_whitespace(line)
+    line = line.split()
+    if (len(line) < 1):
+        return assembled
+    print(line)
     opcode = line[0]
     parameters = []
 
@@ -66,6 +69,10 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
 
     try:
         if (len(line) == 1):    # lines with only instruction are implied or stack addressing mode
+            if (line[0][0] == "."):
+                print("directive")
+                # handle directives here
+
             for key in opcodes_implied:
                 if (opcode == key):
                     assembled.append(opcodes_implied[opcode])
@@ -85,7 +92,7 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
             raise Exception("ILLEGAL OR UNSUPPORTED OPCODE")
     except:
         traceback.print_exc()
-        util.error(opcode[0])
+        util.error(opcode)
 
 ### WRITING PROCESS ###
 # might need a secondary write() function to handle .org directives
@@ -97,7 +104,7 @@ if __name__ == '__main__':
 
     with open(INPUT_FILE_NAME, "r") as asm:
         current_line = asm.readline()
-
+        
         while current_line:
             current_line_raw = assemble(current_line)
 
@@ -107,7 +114,7 @@ if __name__ == '__main__':
 
             current_line = asm.readline()
 
-    print('\033[92m' + "[INFO] ASSEMBLED " + str(current_byte) + " BYTES" '\033[0m')
+    print('\033[92m' + "[INFO]\t\tASSEMBLED " + str(current_byte) + " BYTES" '\033[0m')
 
     output[0x7ffc] = 0x00       # RESET VECTOR; BEGINNING OF ROM
     output[0x7ffd] = 0x80
@@ -115,4 +122,4 @@ if __name__ == '__main__':
     with open(OUTPUT_FILE_NAME, "wb") as file_out:   #write actual binary
         file_out.write(output)
 
-    print('\033[92m' + "[SUCCESS] WROTE BINARY TO " + OUTPUT_FILE_NAME + "!" + '\033[0m')
+    print('\033[92m' + "[SUCCESS]\tWROTE BINARY TO " + OUTPUT_FILE_NAME + "!" + '\033[0m')

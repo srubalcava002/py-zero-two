@@ -14,23 +14,17 @@ byte listenForData() {
     return Serial.read();
 }
 
-void latchAddress(int address) {
-    // CONVERT ADDRESS/CURRENT BYTE TO PINS
+void write(int address, byte data) {    // needs a delay of ~10 ms after each write for some reason
     addressToPins(address);
-
-    digitalWrite(WRITE_ENABLE, LOW);
-}
-
-void latchData(byte data) {
-    // CONVERT DATA TO PINS
     dataToPins(data);
+    digitalWrite(WRITE_ENABLE, LOW);
+    delayMicroseconds(1);
     digitalWrite(WRITE_ENABLE, HIGH);
 }
 
-void dataPolling() { // ATTEMPT TO READ LAST BYTE WRITTEN TO MAKE DATA VALID
-    digitalWrite(OUTPUT_ENABLE, LOW); // ENABLE OUTPUT AFTER SETTING ADDRESS. LAST ADDRESS SHOULD ALREADY BE SET FROM LAST BYTE WRITTEN?
-    delayMicroseconds(50);
-    digitalWrite(OUTPUT_ENABLE, HIGH);
+void read(int address) {
+    addressToPins(address);
+    delay(1);
 }
 
 void addressToPins(int current_address) {
@@ -61,40 +55,9 @@ void dataToPins(byte current_data) {
     }
 }
 
-void clearLines() {
-    for (int i = ADDRESS_BEGIN; i <= DATA_END; i++) {
-        digitalWrite(i, LOW);
-    }
-}
-
-int readEeprom(int address) {
-    digitalWrite(OUTPUT_ENABLE, LOW);
-    
-    for (int i = DATA_BEGIN; i <= DATA_END; i++) {
-            pinMode(i, INPUT);
-    }
-    
-    latchAddress(address);
-
-    int data = 0;
-    int output = 0;
-    for (int i = DATA_BEGIN; i < DATA_END; i++) {
-        data = digitalRead(i);
-
-        if (data == HIGH) {
-            output += 1;
-            output = output << 1;
-        }
-        else {
-            output = output << 1;
-        }
-    }
-
-    return output;
-}
 
 void setup() {
-    for (int i = WRITE_ENABLE; i <= DATA_END; i++) {
+    for (int i = WRITE_ENABLE; i < DATA_END; i++) {
         pinMode(i, OUTPUT);
     }
 
@@ -122,8 +85,8 @@ void setup() {
 
         byte_write = Serial.read();
         delay(100);
-        latchAddress(current_byte);
-        latchData(byte_write);
+        write(current_byte, byte_write);
+        delay(10);
 
         Serial.write("Q");
         Serial.flush();

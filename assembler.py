@@ -10,6 +10,23 @@ INPUT_FILE_NAME = sys.argv[1]
 OUTPUT_FILE_NAME = sys.argv[2]
 
 ### OPCODE DEFINITION ###
+"""
+addressing modes:
+accumulator*
+immediate*
+implied*
+
+relative*
+absolute*
+zero-page
+indirect
+
+absolute indexed
+zero-page indexed
+indirect-indexed
+"""
+
+
 opcodes_implied = {
     'nop': 0xea,
     'clc': 0x18,
@@ -33,34 +50,97 @@ opcodes_implied = {
     'sed': 0xf8,
 }
 
-opcodes_stack = {
-
-}
-
 opcodes_accumulator = {
     'asl': 0x0a,
-    'inc': 0x1a
+    'inc': 0x1a,
+    'rol': 0x2a,
+    'dec': 0x3a,
+    'lsr': 0x4a,
+    'ror': 0x6a,
+    'ldy': 0xac
 }
 
 opcodes_immediate = {
-    'lda': 0xa9,
     'ora': 0x09,
     'and': 0x29,
-    'eor': 0x49
+    'eor': 0x49,
+    'bit': 0x89,
+    'ldy': 0xa0,
+    'ldx': 0xa2,
+    'lda': 0xa9,
+    'cpy': 0xc0,
+    'cmp': 0xc9,
+    'cpx': 0xe0,
+    'sbc': 0xe9
 }
 
-opcodes_zero_page = {
-
+opcodes_relative = { # only used for branch instructions?
+    'bbr0': 0x0f,
+    'bpl': 0x10,
+    'bbr1': 0x1f,
+    'bbr2': 0x2f,
+    'bmi': 0x30,
+    'bbr3': 0x3f,
+    'bbr4': 0x4f,
+    'bvc': 0x50,
+    'bbr5': 0x5f,
+    'bbr6': 0x6f,
+    'bvs': 0x70,
+    'bbr7': 0x7f,
+    'bra': 0x80,
+    'bbs0': 0x8f,
+    'bcc': 0x90,
+    'bbs1': 0x9f,
+    'bbs2': 0xaf,
+    'bcs': 0xb0,
+    'bbs3': 0xbf,
+    'bbs4': 0xcf,
+    'bne': 0xd0,
+    'bbs5': 0xdf,
+    'bbs6': 0xef,
+    'beq': 0xf0,
+    'bbs7': 0xff
 }
 
+opcodes_absolute = {
+    'tsb': 0x0c,
+    'ora': 0x0d,
+    'als': 0x0e,
+    'trb': 0x1c,
+    'jsr': 0x20,
+    'bit': 0x2c,
+    'and': 0x2d,
+    'rol': 0x2e,
+    'jmp': 0x4c,
+    'eor': 0x4d,
+    'lsr': 0x4e,
+    'adc': 0x6d,
+    'ror': 0x6e,
+    'sty': 0x8c,
+    'sta': 0x8d,
+    'stx': 0x8e,
+    'stz': 0x9c,
+    'lda': 0xad,
+    'ldx': 0xae,
+    'cpy': 0xcc,
+    'cmp': 0xcd,
+    'dec': 0xce,
+    'cpx': 0xec,
+    'sbc': 0xed,
+    'inc': 0xee
+}
+
+opcodes_stack = {
+
+}
 ### A S S E M B L Y ###
 def assemble(line: str) -> bytearray:         # might need a refactor to assemble line by line to solve the stack vs implied addressing mode problem
     assembled = []
 
     line = line.split()
+    print(line)
     if (len(line) < 1):
         return assembled
-    print(line)
     opcode = line[0]
     parameters = []
 
@@ -76,16 +156,19 @@ def assemble(line: str) -> bytearray:         # might need a refactor to assembl
             for key in opcodes_implied:
                 if (opcode == key):
                     assembled.append(opcodes_implied[opcode])
+                    print("implied addressing mode")
                     return assembled
 
             for key in opcodes_stack:
                 if (opcode == key):
                     assembled.append(opcodes_stack[opcode])
+                    print("stack addressing mode")
                     return assembled
 
         elif (parameters[0][0] == "#"):   # lines containing '#' are immediate addressing mode
             assembled.append(opcodes_immediate[opcode])
             assembled.append(int(parameters[0][1:]))     # remove "#" prefixing immediate data
+            print("immediate addressing mode")
             return assembled
 
         else:

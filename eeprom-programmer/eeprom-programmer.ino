@@ -71,7 +71,7 @@ void setup() {
     if (Serial.available() <= 0) {
         Serial.write("A");
         while (Serial.available() <= 0) {
-            delay(100);
+            delay(1);
         }
     }
 
@@ -80,17 +80,17 @@ void setup() {
         Serial.flush();
 
         while(Serial.available() <= 0) {
-            delay(100);
+            delay(10);
         }
 
         byte_write = Serial.read();
-        delay(100);
+        delay(10);
         write(current_byte, byte_write);
         delay(10);
 
         Serial.write("Q");
         Serial.flush();
-        delay(100);        
+        delay(10);        
     }
 }
 

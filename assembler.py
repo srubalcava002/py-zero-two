@@ -134,42 +134,52 @@ opcodes_stack = {
 
 }
 ### A S S E M B L Y ###
-def assemble(line: str) -> bytearray:         # might need a refactor to assemble line by line to solve the stack vs implied addressing mode problem
+def assemble(line: str, index: int) -> bytearray:         # might need a refactor to assemble line by line to solve the stack vs implied addressing mode problem
     assembled = []
 
     line = line.split()
     print(line)
     if (len(line) < 1):
-        return assembled
+        return False
     opcode = line[0]
     parameters = []
-
-    for i in range(1, len(line)):
-        parameters.append(line[i])
+    if (len(line) > 1):
+        parameters = line[1:]   # parameters after opcode
 
     try:
         if (len(line) == 1):    # lines with only instruction are implied or stack addressing mode
             if (line[0][0] == "."):
-                print("directive")
-                # handle directives here
+                if line[0][1] == "w":   # .word directive. writes arbitrary word directly to rom
+                    assembled = [line[1][2:], line[1][:2]]   # big endian word in assembled array. probably wrong indexing
+                    return assembled
+                if (line[0][1] == "o") :    # .org directive. changes current byte
+                    assembled = int(line[1])
+                    return assembled
 
+        if not parameters:
             for key in opcodes_implied:
                 if (opcode == key):
                     assembled.append(opcodes_implied[opcode])
                     print("implied addressing mode")
-                    return assembled
+                    index += len(assembled)
+                    output = [assembled, index]
+                    return output
 
             for key in opcodes_stack:
                 if (opcode == key):
                     assembled.append(opcodes_stack[opcode])
                     print("stack addressing mode")
-                    return assembled
+                    index += len(assembled)
+                    output = [assembled, index]
+                    return output
 
         elif (parameters[0][0] == "#"):   # lines containing '#' are immediate addressing mode
             assembled.append(opcodes_immediate[opcode])
             assembled.append(int(parameters[0][1:]))     # remove "#" prefixing immediate data
             print("immediate addressing mode")
-            return assembled
+            index += len(assembled)
+            output = [assembled, index]
+            return output
 
         else:
             raise Exception("ILLEGAL OR UNSUPPORTED OPCODE")
@@ -190,6 +200,9 @@ if __name__ == '__main__':
         
         while current_line:
             current_line_raw = assemble(current_line)
+            if isinstance(current_line_raw, int):   # change current byte if assemble() returns an int
+                current_byte = current_line_raw
+                continue
 
             for binary in current_line_raw:        # write each byte in the returned list to the rom bytearray
                 output[current_byte] = binary
@@ -200,7 +213,7 @@ if __name__ == '__main__':
     print('\033[92m' + "[INFO]\t\tASSEMBLED " + str(current_byte) + " BYTES" '\033[0m')
 
     output[0x7ffc] = 0x00       # RESET VECTOR; BEGINNING OF ROM
-    output[0x7ffd] = 0x80
+    output[0x7ffd] = 0x80       # OVERWRITES ANYTHING THERE
 
     with open(OUTPUT_FILE_NAME, "wb") as file_out:   #write actual binary
         file_out.write(output)

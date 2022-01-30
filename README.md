@@ -19,3 +19,8 @@ python serial-send.py raw_binary.bin [serial port]
 ```
 
 eeprom-programmer.ino should be running and listening for bytes on the serial port *before* starting serial-send.py. 
+
+## the physical build
+In circuit EEPROM flashing and bus debugging has been implemented!
+
+![alt text](./img/image2.jpeg)
